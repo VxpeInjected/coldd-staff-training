@@ -23,7 +23,7 @@ function rev(n){var a=[];for(var i=n-1;i>=0;i--)a.push(i);return a}
 function post(){
 $$("[data-n]").forEach(function(el){var to=+el.dataset.n,s=el.dataset.s||"",t0=null;function f(t){t0=t0||t;var p=Math.min(1,(t-t0)/1200);el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+s;if(p<1)requestAnimationFrame(f)}requestAnimationFrame(f)});
 setTimeout(function(){$$("[data-w]").forEach(function(el){el.style.width=el.dataset.w+"%"});$$("[data-l]").forEach(function(el){el.style.left=el.dataset.l+"%"});$$("[data-p]").forEach(function(el){el.style.strokeDasharray=(el.dataset.p*el.dataset.c)+" 999"})},200);
-$$(".card").forEach(function(c){c.onmousemove=function(e){var r=c.getBoundingClientRect();c.style.setProperty("--mx",e.clientX-r.left+"px");c.style.setProperty("--my",e.clientY-r.top+"px")}})}
+}
 function donut(p,txt,sub,big){var c=2*Math.PI*48;return'<div class="donut" style="'+(big?"":"width:3.4rem;height:3.4rem")+'"><svg viewBox="0 0 120 120"><circle class="t" cx="60" cy="60" r="48"/><circle class="v" cx="60" cy="60" r="48" data-p="'+p+'" data-c="'+c+'"/></svg><div style="'+(big?"":"font-size:.8rem")+'"><span>'+txt+'</span>'+(sub?'<small>'+sub+'</small>':"")+'</div></div>'}
 
 /* charts */
@@ -49,18 +49,24 @@ function bind(){$$("li",ul).forEach(function(li){var p=+li.dataset.p;$$("button"
 li.ondragstart=function(e){e.dataTransfer.setData("text","x");ul._d=p;li.classList.add("drag")};li.ondragend=function(){li.classList.remove("drag")};li.ondragover=function(e){e.preventDefault()};li.ondrop=function(e){e.preventDefault();mv(ul._d,p)}})}draw()}
 
 /* views */
-function home(){var nx=TEAMS.reduce(function(n,x){return n+x.ex.length},0),nq=TEAMS.reduce(function(n,x){return n+x.qs.length+3},0);
-var mq=TEAMS.map(function(t){return t.comps.join("</span><span>")}).join("</span><span>");
-M.innerHTML='<section class="hero"><div class="bn"></div><div class="boot" id="bt"></div><h1>Staff training,<br><span>built for coldd.</span></h1><p class="lead" style="margin-top:1.4rem">Pick your team, take a short assessment of how you handle real situations, then train on a path built from your own results.</p><div class="row"><button class="btn" id="go">Begin assessment</button>'+(S.t&&S.hist.length?'<button class="btn ghost" id="lr">Last results</button>':"")+'</div><div class="stats"><div><b data-n="'+TEAMS.length+'">0</b><span>teams</span></div><div><b data-n="'+nq+'">0</b><span>assessment questions</span></div><div><b data-n="5">0</b><span>question types</span></div><div><b data-n="'+nx+'">0</b><span>interactive exercises</span></div></div></section><div class="mq"><div><span>'+mq+'</span><span>'+mq+'</span></div></div>';
-$("#go").onclick=function(){go("team")};if($("#lr"))$("#lr").onclick=function(){go("results")};
-var tx="> booting coldd training module... ready",k=0,el=$("#bt"),iv=setInterval(function(){el.textContent=tx.slice(0,++k);if(k>=tx.length)clearInterval(iv)},35)}
-function teams(){M.innerHTML='<div class="tag">step 1</div><h1 style="margin:.8rem 0 .5rem">Choose your team</h1><p class="mut">Pick the department you work in or are joining.</p><div class="grid">'+TEAMS.map(function(t,i){var dn=t.ex.filter(function(_,n){return S.d[t.id+n]!=null}).length;return'<button class="card" data-t="'+t.id+'" style="animation:in .6s '+(i*.1)+'s backwards"><span class="code">'+t.code+'</span><h2>'+t.name+'</h2><p class="mut">'+t.line+'</p><div class="chips">'+t.comps.map(function(c){return'<span class="tag">'+c+'</span>'}).join("")+'</div>'+(dn?'<p class="mono mut" style="margin-top:1rem">'+dn+'/'+t.ex.length+' exercises done</p>':"")+'</button>'}).join("")+'</div>';
-$$(".card").forEach(function(b){b.onclick=function(){if(S.t!==b.dataset.t){S.a={};S.i=0;S.self=[3,3,3]}S.t=b.dataset.t;S.i=0;S.a={};go("quiz")}});post()}
+function unlocked(id){try{return JSON.parse(sessionStorage.getItem("coldd-unlocked")||"[]").indexOf(id)>-1}catch(e){return false}}
+function unlock(id){try{var u=JSON.parse(sessionStorage.getItem("coldd-unlocked")||"[]");u.push(id);sessionStorage.setItem("coldd-unlocked",JSON.stringify(u))}catch(e){}}
+function sha(s){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(b){return[].map.call(new Uint8Array(b),function(x){return("0"+x.toString(16)).slice(-2)}).join("")})}
+function answered(t){var n=QL(t).length;for(var z=3;z<n;z++)if(S.a[z]==null)return false;return true}
+function enter(id){var t=TEAMS.filter(function(x){return x.id===id})[0];if(S.t===id&&S.hist.some(function(h){return h.t===id})&&answered(t)){go("results");return}S.t=id;S.i=0;S.a={};S.self=[3,3,3];go("quiz")}
+function home(){var lock='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+M.innerHTML='<img class="banner" src="banner.jpg" alt="coldd"><h1>Staff training</h1><p class="intro">Training for coldd Development staff. Choose your department and enter the password your team lead gave you. You will answer a short assessment about situations you may face on the job, then get a training plan based on your answers. It takes around 10 minutes.</p><h2 class="sub">Departments</h2><div class="depts">'+TEAMS.map(function(t){var done=S.hist.some(function(h){return h.t===t.id}),dn=t.ex.filter(function(_,n){return S.d[t.id+n]!=null}).length;return'<button class="dept" data-t="'+t.id+'"><span><b>'+t.name+'</b><span class="mut">'+t.line+'</span>'+(done?'<small>Assessment done, '+dn+' of '+t.ex.length+' exercises complete</small>':"")+'</span><span class="lk">'+lock+'Password</span></button>'}).join("")+'</div>';
+$$(".dept").forEach(function(b){b.onclick=function(){if(unlocked(b.dataset.t))enter(b.dataset.t);else{S.g=b.dataset.t;go("gate")}}})}
+function gate(){var t=TEAMS.filter(function(x){return x.id===S.g})[0];if(!t){S.v="home";return home()}
+M.innerHTML='<button class="btn ghost" id="bk">Back</button><h1 style="margin-top:2rem">'+t.name+'</h1><p class="intro">Enter the department password. If you do not have it, ask your team lead.</p><div class="gate"><input id="pw" type="password" autocomplete="off" placeholder="Password" aria-label="Password"><button class="btn" id="en">Continue</button></div><p class="err" id="er" role="alert"></p>';
+var inp=$("#pw");inp.focus();
+function tryit(){if(!window.crypto||!crypto.subtle){$("#er").textContent="This page needs a secure (https) connection to check passwords.";return}sha(t.id+":"+inp.value.trim()).then(function(h){if(h===t.pw){unlock(t.id);enter(t.id)}else{$("#er").textContent="That password is not correct.";inp.select()}})}
+$("#en").onclick=tryit;inp.onkeydown=function(e){if(e.key==="Enter")tryit()};$("#bk").onclick=function(){go("home")}}
 function quiz(){var t=team(),Q=QL(t),i=S.i,q=Q[i];
 M.innerHTML='<div class="bar">'+Q.map(function(_,k){return'<i class="'+(k<i?"d":k===i?"c":"")+'"></i>'}).join("")+'</div><div class="qm"><span>'+(q.bg?"Profile / ":"")+TYPE[q.t]+'</span><span>'+(i+1)+' / '+Q.length+'</span></div><div class="qc"><h2>'+q.q+'</h2><div id="qb"></div></div><div class="qf"><button class="btn ghost" id="bk">Back</button><button class="btn" id="lk">Lock in</button></div>';
 var b=$("#qb"),lk=$("#lk");
 function nx(){if(i+1>=Q.length){var per=calc(t),tot=per.reduce(function(x,y){return x+y},0)/per.length;S.hist.push({t:t.id,ts:Date.now(),tot:tot,sc:per,self:S.self.slice()});go("results")}else{S.i++;go("quiz")}}
-lk.onclick=nx;$("#bk").onclick=function(){if(i>0){S.i--;go("quiz")}else go("team")};
+lk.onclick=nx;$("#bk").onclick=function(){if(i>0){S.i--;go("quiz")}else go("home")};
 if(q.t==="single"){lk.style.display="none";b.innerHTML=q.o.map(function(o,j){return'<button class="opt'+(S.a[i]===j?" on":"")+'" data-j="'+j+'"><b>'+"ABCD"[j]+'</b><span>'+o[0]+'</span></button>'}).join("");
 $$(".opt",b).forEach(function(x){x.onclick=function(){S.a[i]=+x.dataset.j;save();$$(".opt",b).forEach(function(y){y.classList.remove("on")});x.classList.add("on");setTimeout(nx,260)}})}
 else if(q.t==="multi"){S.a[i]=S.a[i]||[];lk.disabled=!S.a[i].length;b.innerHTML=q.o.map(function(o,j){return'<button class="opt ck'+(S.a[i].indexOf(j)>-1?" on":"")+'" data-j="'+j+'"><b></b><span>'+o[0]+'</span></button>'}).join("");
@@ -84,7 +90,7 @@ h+='<div class="sec"><div class="ch"><span>Your training path</span><span class=
 ord.forEach(function(c){var ex=t.ex.map(function(e,n){return[e,n]}).filter(function(x){return x[0].c===c}),d=ex.filter(function(x){return S.d[t.id+x[1]]!=null}).length;
 h+='<div class="ch"><span style="font-size:1.05rem">'+t.comps[c]+'</span>'+donut(d/ex.length,d+'/'+ex.length,"",0)+'</div><div class="xg">'+ex.map(function(x){var e=x[0],id=t.id+x[1],s=S.d[id];return'<button class="card xc'+(s!=null?" done":"")+'" data-e="'+x[1]+'"><span class="k">'+KIND[e.k]+'</span><h3>'+e.t+'</h3><span class="f"><span>'+e.m+' min</span><span>'+(s!=null?"best "+s+"%":"not started")+'</span></span></button>'}).join("")+'</div>'});
 h+='</div><details class="rv sec"><summary>Review your answers</summary>'+t.qs.map(function(q,i){return'<div class="q"><b>'+q.q+'</b><small>You: '+mine(q,S.a[3+i])+'</small><small>Strongest: '+corr(q)+'</small><small>'+q.why+'</small></div>'}).join("")+'</details><div class="row"><button class="btn ghost" id="rt">Retake assessment</button><button class="btn ghost" id="tm">Change team</button></div>';
-M.innerHTML=h;$$(".xc").forEach(function(b){b.onclick=function(){S.e=+b.dataset.e;go("ex")}});$("#rt").onclick=function(){S.a={};S.i=0;S.self=[3,3,3];go("quiz")};$("#tm").onclick=function(){go("team")};post()}
+M.innerHTML=h;$$(".xc").forEach(function(b){b.onclick=function(){S.e=+b.dataset.e;go("ex")}});$("#rt").onclick=function(){S.a={};S.i=0;S.self=[3,3,3];go("quiz")};$("#tm").onclick=function(){go("home")};post()}
 
 /* exercise engines */
 function finish(el,id,score,extra){score=Math.round(score);S.d[id]=Math.max(S.d[id]||0,score);save();
@@ -122,10 +128,11 @@ function exView(){var t=team(),e=t.ex[S.e],id=t.id+S.e;
 M.innerHTML='<button class="btn ghost" id="bk">Back to path</button><div class="ch" style="margin-top:1.8rem"><span class="tag">'+KIND[e.k]+' / '+t.comps[e.c]+'</span><span class="mono mut">'+e.m+' min</span></div><h1 style="font-size:clamp(1.8rem,5vw,3rem);margin:.6rem 0 1rem">'+e.t+'</h1><p class="mut">'+(e.intro||e.prompt||"Flip each card, then mark whether you knew it.")+'</p><div id="xb" class="panel cut"></div>';
 $("#bk").onclick=function(){go("results")};ENG[e.k](e,$("#xb"),id)}
 function render(){var t=team(),st=$("#st");
-if(["quiz","results","ex"].indexOf(S.v)>-1&&!t)S.v="team";
+if(["home","gate","quiz","results","ex"].indexOf(S.v)<0)S.v="home";
+if(["quiz","results","ex"].indexOf(S.v)>-1&&(!t||!unlocked(t.id)))S.v="home";
 if(S.v==="results"||S.v==="ex"){var n=QL(t).length;for(var z=3;z<n;z++)if(S.a[z]==null){S.v="quiz";S.i=z;break}}
 if(S.v==="ex"&&!t.ex[S.e])S.v="results";
-st.textContent=S.v==="home"?"online":S.v==="team"?"select team":(S.v==="quiz"?"assessment / ":S.v==="ex"?"training / ":"report / ")+t.code.toLowerCase();
-({home:home,team:teams,quiz:quiz,results:results,ex:exView})[S.v]();if(S.v!=="results"&&S.v!=="team"&&S.v!=="home")post()}
+st.textContent=t&&["quiz","results","ex"].indexOf(S.v)>-1?t.name:"";
+({home:home,gate:gate,quiz:quiz,results:results,ex:exView})[S.v]();if(S.v==="quiz"||S.v==="ex")post()}
 $("#hm").onclick=function(){go("home")};
 render();

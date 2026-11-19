@@ -1,5 +1,5 @@
 var TEAMS=[
-{id:"cs",name:"Customer Service",code:"CS",line:"Tickets, DMs and live chat with people who need something fixed.",
+{id:"cs",name:"Customer Service",code:"CS",pw:"cde63f2bffaeff0ba95380555e7b3fd47bdbf3451dd669b8527db289ef7d249a",line:"Tickets, DMs and live chat with people who need something fixed.",
 good:"Good customer service means the person feels heard in the first sentence, knows what happens next, and never has to repeat themselves.",
 comps:["Empathy and tone","Problem solving","Ownership and escalation"],
 bg:[{q:"How much customer-facing support experience do you have?",o:["None yet","Under a year","One to three years","More than three years"]},
@@ -28,7 +28,7 @@ ex:[
 {say:"Fine. Do that.",o:[["Done. I’ve sent them your order, the issue and what you asked for. You’ll hear by 5pm.",20,"A promise with a time."],["Will do.",-5,"Vague, no time."],["Ok.",-15,"Leaves them guessing."]]}]},
 {c:2,k:"write",t:"The handoff note",m:15,prompt:"Write an escalation note for a stuck ticket. A colleague should be able to act without asking you anything.",checks:["Who the customer is and what they want","What you already tried","What the customer was told","The deadline or urgency"],min:40}]},
 
-{id:"mod",name:"Moderation",code:"MOD",line:"Keeping chat safe and fair, one decision at a time.",
+{id:"mod",name:"Moderation",code:"MOD",pw:"6bdf64f6a5415a22ffa4f15680841ee86256e4bbb9bf4439c0deca8c32cfdb80",line:"Keeping chat safe and fair, one decision at a time.",
 good:"Good moderation is consistent, calm and documented. Members should be able to predict what happens when a rule is broken, and trust that it applies to everyone.",
 comps:["Fair enforcement","De-escalation","Judgment and records"],
 bg:[{q:"How much moderation experience do you have?",o:["None yet","Small or friend-group servers","Large or public communities","A paid or staff role"]},
@@ -57,7 +57,7 @@ ex:[
 {say:"You are not sure it counts as a rule break.",o:[["Ask a senior and log that you did.",20,"Second opinion plus record."],["Guess.",-20,"Never guess."],["Delete everything and move on.",-10,"No record."]]}]},
 {c:2,k:"write",t:"Case file",m:15,prompt:"Write up a past or invented incident in this format: user, rule, evidence, action, time, notes.",checks:["Evidence is linked or quoted","Action matches the ladder","Times and names are exact","A senior could review it with no questions"],min:40}]},
 
-{id:"cm",name:"Community Management",code:"CM",line:"Building the place people want to come back to.",
+{id:"cm",name:"Community Management",code:"CM",pw:"e923b880b293298d0d79c59646d276f06efe52b09fd9f01a0d160f43600ede14",line:"Building the place people want to come back to.",
 good:"Good community management keeps conversations going without forcing them, speaks in a clear voice, and turns feedback into something the team can use.",
 comps:["Engagement","Voice and announcements","Feedback and crisis"],
 bg:[{q:"Have you run or helped run a community before?",o:["No","A small one","A medium one","A large one"]},
